@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kubernetes: руководство по работе с приложениями</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #616a75; --border: #d8dee4;
+    --accent: #0a6ebd; --code-bg: #f5f7f9; --table-head: #f0f3f6;
+    --note-bg: #eef5fb; --note-border: #a8cdea;
+    --warn-bg: #fdf4e7; --warn-border: #e8c48a; --sidebar-bg: #fafbfc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171a; --fg: #e4e6e8; --muted: #9aa4ae; --border: #2c3238;
+      --accent: #58a6e8; --code-bg: #1c2024; --table-head: #1e2328;
+      --note-bg: #16242f; --note-border: #2b4c66;
+      --warn-bg: #2a2318; --warn-border: #5c4a2a; --sidebar-bg: #171b1f;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .layout { display: flex; align-items: flex-start; max-width: 1180px; margin: 0 auto; }
+  nav { position: sticky; top: 0; flex: 0 0 270px; height: 100vh; overflow-y: auto;
+    padding: 28px 20px; border-right: 1px solid var(--border); background: var(--sidebar-bg); font-size: 14px; }
+  nav .brand { font-weight: 600; font-size: 15px; margin-bottom: 18px; }
+  nav ul { list-style: none; padding: 0; margin: 0 0 18px; }
+  nav a { display: block; padding: 4px 0; color: var(--muted); text-decoration: none; cursor: pointer;
+    border-left: 2px solid transparent; padding-left: 8px; transition: color .12s, border-color .12s; }
+  nav a:hover { color: var(--accent); text-decoration: underline; }
+  nav a.active { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+  nav .group { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+    margin: 16px 0 6px; font-weight: 600; }
+  nav .sub a { padding-left: 20px; }
+  main { flex: 1 1 auto; min-width: 0; padding: 28px 36px 80px; }
+  h1 { font-size: 27px; line-height: 1.25; margin: 0 0 14px; font-weight: 600; }
+  h2 { font-size: 21px; margin: 40px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    font-weight: 600; scroll-margin-top: 24px; }
+  h3 { font-size: 17px; margin: 26px 0 8px; font-weight: 600; }
+  p { margin: 10px 0; }
+  code, pre { font-family: "SF Mono", Consolas, "Liberation Mono", monospace; font-size: 13px; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 5px; padding: 12px 14px;
+    overflow-x: auto; margin: 10px 0; }
+  pre code { background: none; padding: 0; }
+  ul.body, ol.body { margin: 10px 0; padding-left: 22px; }
+  ul.body li, ol.body li { margin: 4px 0; }
+  .tablewrap { overflow-x: auto; margin: 12px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--table-head); font-weight: 600; }
+  .note, .warn { border-radius: 5px; padding: 11px 14px; margin: 14px 0; font-size: 14px; }
+  .note { background: var(--note-bg); border-left: 3px solid var(--note-border); }
+  .warn { background: var(--warn-bg); border-left: 3px solid var(--warn-border); }
+  .demo { border: 1px solid var(--warn-border); background: var(--warn-bg); border-radius: 5px;
+    padding: 11px 14px; margin: 0 0 24px; font-size: 13.5px; color: var(--muted); }
+  .lede { color: var(--muted); font-size: 16px; margin: 0 0 20px; }
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+  @media (max-width: 820px) {
+    .layout { flex-direction: column; }
+    nav { position: static; height: auto; flex: none; width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+    main { padding: 22px 18px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav>
+  <div class="brand">Kubernetes</div>
+  <ul>
+    <li><a href="#intro">Введение</a></li>
+  </ul>
+  <div class="group">Руководство</div>
+  <ul class="sub">
+    <li><a href="#overview">Обзор кластера</a></li>
+    <li><a href="#namespaces">Работа с namespaces</a></li>
+    <li><a href="#deployments">Деплойменты</a></li>
+    <li><a href="#pods">Статус подов</a></li>
+    <li><a href="#logs">Просмотр логов</a></li>
+  </ul>
+  <div class="group">Диагностика</div>
+  <ul class="sub">
+    <li><a href="#problems">Частые проблемы</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<h1>Kubernetes: руководство по работе с приложениями</h1>
+
+<p class="lede">Руководство для разработчиков, которые разворачивают и обслуживают свои приложения на платформе.</p>
+
+<h2 id="intro">Введение</h2>
+<p>Платформа запускает приложения в кластере Kubernetes. Основной инструмент работы — утилита командной строки <code>kubectl</code>: она отправляет запросы к кластеру и показывает результат.</p>
+<p><strong>Что нужно перед началом работы:</strong></p>
+<ul class="body">
+  <li>установленная утилита <code>kubectl</code> — см. <a href="https://kubernetes.io/ru/docs/tasks/tools/">Установка kubectl</a>;</li>
+  <li>файл доступа к кластеру (kubeconfig) — его выдаёт команда эксплуатации;</li>
+  <li>права на тот namespace, в котором вы работаете.</li>
+</ul>
+<p><strong>Как проверить, что доступ настроен.</strong> Выполните:</p>
+<pre><code>kubectl cluster-info</code></pre>
+<p>Если в ответе появился адрес control plane, доступ есть. Если команда сообщает об ошибке подключения — см. раздел <a href="#problems">Частые проблемы</a>.</p>
+<p>Все примеры в руководстве приведены для окружения разработки — namespace <code>development</code>.</p>
+
+<h2 id="overview">1. Обзор кластера</h2>
+<p>Кластер состоит из управляющего слоя (control plane) и рабочих узлов, на которых выполняются приложения. Управляющий слой принимает команды, хранит описания ресурсов и следит за тем, чтобы фактическое состояние кластера соответствовало описанному.</p>
+<p><strong>Как посмотреть основные адреса кластера:</strong></p>
+<pre><code>kubectl cluster-info</code></pre>
+<p>Пример вывода:</p>
+<pre><code>Kubernetes control plane is running at https://cluster.example.com:6443
+CoreDNS is running at https://cluster.example.com:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.</code></pre>
+<p>Что здесь важно:</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Компонент</th><th>Адрес</th><th>Назначение</th></tr></thead>
+  <tbody>
+    <tr><td>Control plane</td><td><code>https://cluster.example.com:6443</code></td><td>Точка входа в кластер. Сюда обращается <code>kubectl</code> и все инструменты автоматизации</td></tr>
+    <tr><td>CoreDNS</td><td>служба в namespace <code>kube-system</code></td><td>Внутренний DNS кластера. Благодаря ему приложения обращаются друг к другу по именам, а не по IP-адресам</td></tr>
+  </tbody>
+</table></div>
+<p>Ресурсы кластера разделены на namespaces — логические разделы (подробнее в разделе <a href="#namespaces">Работа с namespaces</a>). В нашем кластере их семь:</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Namespace</th><th>Назначение</th></tr></thead>
+  <tbody>
+    <tr><td><code>development</code></td><td>Окружение разработки. Здесь разработчики разворачивают и проверяют свои изменения</td></tr>
+    <tr><td><code>staging</code></td><td>Предпродакшн. Проверка релиза на конфигурации, близкой к боевой</td></tr>
+    <tr><td><code>production</code></td><td>Боевое окружение. Обслуживает реальных пользователей</td></tr>
+    <tr><td><code>default</code></td><td>Namespace по умолчанию. Приложения платформы здесь не размещаются</td></tr>
+    <tr><td><code>kube-system</code></td><td>Служебные компоненты Kubernetes: DNS, сетевые агенты, контроллеры. <strong>Изменять его содержимое нельзя</strong></td></tr>
+    <tr><td><code>kube-public</code></td><td>Служебный namespace с общедоступной информацией о кластере</td></tr>
+    <tr><td><code>kube-node-lease</code></td><td>Служебный namespace, через который узлы сообщают кластеру, что они живы</td></tr>
+  </tbody>
+</table></div>
+<p>Разработчику нужны, как правило, только <code>development</code> и <code>staging</code>. Доступ к <code>production</code> выдаётся отдельно.</p>
+
+<h2 id="namespaces">2. Работа с namespaces</h2>
+<p>Namespace — логический раздел кластера. Ресурсы одного namespace не пересекаются с ресурсами другого по именам, поэтому приложение <code>auth-service</code> может одновременно существовать и в <code>development</code>, и в <code>production</code>.</p>
+
+<h3>2.1. Как посмотреть список namespaces</h3>
+<pre><code>kubectl get namespaces</code></pre>
+<p>Пример вывода:</p>
+<pre><code>NAME              STATUS   AGE
+default           Active   365d
+kube-node-lease   Active   365d
+kube-public       Active   365d
+kube-system       Active   365d
+development       Active   180d
+production        Active   180d
+staging           Active   180d</code></pre>
+<p>Столбцы:</p>
+<ul class="body">
+  <li><strong>NAME</strong> — имя namespace;</li>
+  <li><strong>STATUS</strong> — состояние. <code>Active</code> — рабочее состояние. <code>Terminating</code> означает, что namespace удаляется и создавать в нём ресурсы уже нельзя;</li>
+  <li><strong>AGE</strong> — сколько времени существует namespace.</li>
+</ul>
+<p>Сокращённая форма команды — <code>kubectl get ns</code>.</p>
+
+<h3>2.2. Как создать namespace</h3>
+<pre><code>kubectl create namespace my-feature</code></pre>
+<p>Или декларативно, через манифест — этот способ предпочтителен, потому что файл можно хранить в репозитории вместе с остальной конфигурацией:</p>
+<pre><code># namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-feature</code></pre>
+<pre><code>kubectl apply -f namespace.yaml</code></pre>
+<div class="warn"><strong>Важно.</strong> Создание namespace обычно требует расширенных прав. Если команда завершается ошибкой <code>forbidden</code>, обратитесь в команду эксплуатации.</div>
+
+<h3>2.3. Как переключиться между namespaces</h3>
+<p>Есть два способа.</p>
+<p><strong>Способ 1. Указать namespace в конкретной команде</strong> — флаг <code>-n</code> (или <code>--namespace</code>):</p>
+<pre><code>kubectl get pods -n development</code></pre>
+<p>Подходит, когда нужно однократно заглянуть в чужое окружение.</p>
+<p><strong>Способ 2. Сменить namespace по умолчанию для текущего контекста:</strong></p>
+<pre><code>kubectl config set-context --current --namespace=development</code></pre>
+<p>После этого флаг <code>-n</code> можно не указывать: все команды будут выполняться в <code>development</code>.</p>
+<p><strong>Как проверить текущий namespace:</strong></p>
+<pre><code>kubectl config view --minify --output 'jsonpath={..namespace}'</code></pre>
+<p>Если команда ничего не вывела, действует namespace <code>default</code>.</p>
+<div class="note"><strong>Совет.</strong> Прежде чем выполнять команды, изменяющие состояние (<code>apply</code>, <code>delete</code>, <code>scale</code>), проверяйте текущий namespace. Это самая частая причина изменений, внесённых не туда, куда планировалось.</div>
+<p><strong>Как посмотреть ресурсы во всех namespaces сразу</strong> — флаг <code>-A</code> (или <code>--all-namespaces</code>):</p>
+<pre><code>kubectl get pods -A</code></pre>
+
+<h2 id="deployments">3. Деплойменты: какие приложения запущены</h2>
+<p>Deployment описывает, какое приложение и в каком количестве копий должно работать. Он создаёт поды по заданному шаблону и поддерживает их количество: если под упал или узел вышел из строя, Deployment создаёт замену.</p>
+
+<h3>3.1. Как посмотреть список деплойментов</h3>
+<pre><code>kubectl get deployments -n development</code></pre>
+<p>Пример вывода:</p>
+<pre><code>NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+auth-service           2/2     2            2           45d
+api-gateway            3/3     3            3           90d
+user-service           2/2     2            2           60d
+payment-service        1/1     1            1           30d
+notification-service   1/1     1            1           15d</code></pre>
+
+<h3>3.2. Как читать вывод</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th>Столбец</th><th>Что означает</th></tr></thead>
+  <tbody>
+    <tr><td><strong>NAME</strong></td><td>Имя деплоймента</td></tr>
+    <tr><td><strong>READY</strong></td><td>Готовые копии из запрошенных, в формате «готово/запрошено». <code>2/2</code> — обе копии работают и принимают трафик. <code>1/2</code> — одна копия ещё не готова: приложение либо запускается, либо не может запуститься</td></tr>
+    <tr><td><strong>UP-TO-DATE</strong></td><td>Сколько копий обновлено до текущей версии шаблона. Если значение меньше, чем в <code>READY</code>, идёт обновление</td></tr>
+    <tr><td><strong>AVAILABLE</strong></td><td>Сколько копий доступно достаточно долго, чтобы считаться стабильными</td></tr>
+    <tr><td><strong>AGE</strong></td><td>Сколько времени существует деплоймент — не путать с временем работы подов</td></tr>
+  </tbody>
+</table></div>
+<p><strong>Признак здорового деплоймента:</strong> все три числа — <code>READY</code>, <code>UP-TO-DATE</code>, <code>AVAILABLE</code> — совпадают с запрошенным количеством копий.</p>
+
+<h3>3.3. Приложения окружения development</h3>
+<p>Все пять сервисов доступны внутри кластера на порту 8080 через сервисы типа ClusterIP — то есть только для других приложений кластера, снаружи они недоступны.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Приложение</th><th>Копий</th><th>Внутренний адрес</th><th>Назначение</th></tr></thead>
+  <tbody>
+    <tr><td><code>api-gateway</code></td><td>3</td><td><code>api-gateway:8080</code> (10.96.100.20)</td><td>Точка входа для внешних запросов, маршрутизация к остальным сервисам. Копий больше всего, потому что через него проходит весь трафик</td></tr>
+    <tr><td><code>auth-service</code></td><td>2</td><td><code>auth-service:8080</code> (10.96.100.10)</td><td>Аутентификация и выдача токенов: вход, выход, обновление токена</td></tr>
+    <tr><td><code>user-service</code></td><td>2</td><td><code>user-service:8080</code> (10.96.100.30)</td><td>Данные пользователей</td></tr>
+    <tr><td><code>payment-service</code></td><td>1</td><td><code>payment-service:8080</code> (10.96.100.40)</td><td>Платежи</td></tr>
+    <tr><td><code>notification-service</code></td><td>1</td><td><code>notification-service:8080</code> (10.96.100.50)</td><td>Отправка уведомлений</td></tr>
+  </tbody>
+</table></div>
+<p>Обращаться к сервису из другого приложения кластера следует по имени, а не по IP-адресу: <code>http://auth-service:8080</code>. IP-адрес сервиса может измениться при пересоздании, имя — нет.</p>
+
+<h3>3.4. Как посмотреть список сервисов</h3>
+<pre><code>kubectl get services -n development</code></pre>
+<p>Пример вывода (столбец AGE опущен):</p>
+<pre><code>NAME                   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)
+auth-service           ClusterIP   10.96.100.10   &lt;none&gt;        8080/TCP
+api-gateway            ClusterIP   10.96.100.20   &lt;none&gt;        8080/TCP
+user-service           ClusterIP   10.96.100.30   &lt;none&gt;        8080/TCP
+payment-service        ClusterIP   10.96.100.40   &lt;none&gt;        8080/TCP
+notification-service   ClusterIP   10.96.100.50   &lt;none&gt;        8080/TCP</code></pre>
+<p><code>EXTERNAL-IP: &lt;none&gt;</code> означает, что напрямую из интернета сервис недоступен. Внешний доступ настраивается отдельно — через Ingress или сервис типа LoadBalancer.</p>
+
+<h3>3.5. Как посмотреть подробности о деплойменте</h3>
+<pre><code>kubectl describe deployment auth-service -n development</code></pre>
+<p>Команда покажет версию образа, стратегию обновления, лимиты ресурсов, условия готовности и последние события — например, из-за чего не удалось создать под.</p>
+
+<h2 id="pods">4. Проверка статуса подов</h2>
+<p>Под — минимальная единица запуска. Одна копия приложения работает в одном поде.</p>
+
+<h3>4.1. Как посмотреть список подов</h3>
+<pre><code>kubectl get pods -n development</code></pre>
+<p>Пример вывода:</p>
+<pre><code>NAME                                  READY   STATUS    RESTARTS   AGE
+auth-service-5f8d9c7b4d-x7k2m         1/1     Running   0          2d
+auth-service-5f8d9c7b4d-p9n3q         1/1     Running   0          2d
+api-gateway-6c7b8d9f5c-m4k8p          1/1     Running   0          5d
+api-gateway-6c7b8d9f5c-n2w7r          1/1     Running   0          5d
+api-gateway-6c7b8d9f5c-q1t5s          1/1     Running   0          5d
+user-service-7d8e9f0a6d-k3j6h         1/1     Running   0          1d
+user-service-7d8e9f0a6d-l5m9n         1/1     Running   0          1d
+payment-service-8e9f0a1b7e-o2p4q      1/1     Running   0          12h
+notification-service-9f0a1b2c8f-r3s5t 1/1     Running   0          6h</code></pre>
+<p>В примере все девять подов исправны: статус <code>Running</code>, все контейнеры готовы, перезапусков нет.</p>
+
+<h3>4.2. Как читать имя пода</h3>
+<p>Имя пода состоит из трёх частей: <code>auth-service-5f8d9c7b4d-x7k2m</code></p>
+<ul class="body">
+  <li><code>auth-service</code> — имя деплоймента;</li>
+  <li><code>5f8d9c7b4d</code> — идентификатор версии шаблона. У подов одной версии он одинаковый, при обновлении приложения меняется. Удобно, чтобы отличить старые поды от новых во время развёртывания;</li>
+  <li><code>x7k2m</code> — случайный суффикс конкретного пода.</li>
+</ul>
+<p>Имя пода одноразовое: после пересоздания под получит новое имя. Не сохраняйте его в скриптах — получайте актуальное имя командой <code>kubectl get pods</code>.</p>
+
+<h3>4.3. Как читать столбцы</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th>Столбец</th><th>Что означает</th></tr></thead>
+  <tbody>
+    <tr><td><strong>READY</strong></td><td>Готовые контейнеры из общего числа в поде. <code>1/1</code> — единственный контейнер работает и прошёл проверку готовности. <code>0/1</code> при статусе <code>Running</code> означает, что контейнер запущен, но проверку готовности не прошёл и трафик на него не идёт</td></tr>
+    <tr><td><strong>STATUS</strong></td><td>Состояние пода — см. таблицу ниже</td></tr>
+    <tr><td><strong>RESTARTS</strong></td><td>Сколько раз контейнер перезапускался. Любое значение больше нуля — повод посмотреть логи. Рядом в скобках может указываться время последнего перезапуска</td></tr>
+    <tr><td><strong>AGE</strong></td><td>Сколько времени существует под. Значение заметно меньше, чем <code>AGE</code> деплоймента, означает, что под пересоздавался: было обновление или перезапуск</td></tr>
+  </tbody>
+</table></div>
+<p><strong>Основные статусы:</strong></p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Статус</th><th>Что значит</th><th>Что делать</th></tr></thead>
+  <tbody>
+    <tr><td><code>Running</code></td><td>Под запущен и работает</td><td>Ничего</td></tr>
+    <tr><td><code>Pending</code></td><td>Под создан, но не запущен: не хватает ресурсов на узлах, нет подходящего узла или не готов том</td><td>Посмотреть события: <code>kubectl describe pod &lt;имя&gt;</code></td></tr>
+    <tr><td><code>ContainerCreating</code></td><td>Загружается образ, создаётся контейнер</td><td>Подождать. Если состояние держится долго — смотреть события</td></tr>
+    <tr><td><code>CrashLoopBackOff</code></td><td>Контейнер запускается, падает и перезапускается по кругу</td><td>Смотреть логи, в том числе предыдущего запуска</td></tr>
+    <tr><td><code>ImagePullBackOff</code> / <code>ErrImagePull</code></td><td>Не удалось скачать образ: опечатка в имени или версии, нет прав к реестру</td><td>Проверить имя образа в манифесте и доступ к реестру</td></tr>
+    <tr><td><code>Terminating</code></td><td>Под завершает работу</td><td>Подождать. Если состояние держится долго, приложение не обрабатывает сигнал завершения</td></tr>
+    <tr><td><code>Completed</code></td><td>Процесс завершился успешно. Нормально для задач (Job), но не для сервиса</td><td>Для сервиса — проверить, что приложение не завершается сразу после старта</td></tr>
+    <tr><td><code>OOMKilled</code></td><td>Контейнер остановлен из-за превышения лимита памяти</td><td>Увеличить лимит памяти или искать утечку</td></tr>
+  </tbody>
+</table></div>
+
+<h3>4.4. Как посмотреть подробности о поде</h3>
+<pre><code>kubectl describe pod auth-service-5f8d9c7b4d-x7k2m -n development</code></pre>
+<p>Самое полезное в выводе — раздел <strong>Events</strong> в конце: там перечислены события пода в хронологическом порядке. Именно оттуда становится понятно, почему под не запускается: не нашлось узла, не скачался образ, не смонтировался том, не прошла проверка работоспособности.</p>
+
+<h3>4.5. Полезные варианты команды</h3>
+<p><strong>Поды только одного приложения</strong> — фильтр по метке:</p>
+<pre><code>kubectl get pods -n development -l app=auth-service</code></pre>
+<p><strong>С указанием узла и IP-адреса пода:</strong></p>
+<pre><code>kubectl get pods -n development -o wide</code></pre>
+<p><strong>Наблюдать за изменениями в реальном времени</strong> — удобно во время развёртывания:</p>
+<pre><code>kubectl get pods -n development -w</code></pre>
+<p><strong>Потребление процессора и памяти</strong> (требуется metrics-server):</p>
+<pre><code>kubectl top pods -n development</code></pre>
+
+<h2 id="logs">5. Просмотр логов</h2>
+<p>Логи — основной источник информации о том, что происходит внутри приложения.</p>
+
+<h3>5.1. Базовая команда</h3>
+<pre><code>kubectl logs &lt;имя-пода&gt; -n &lt;namespace&gt;</code></pre>
+<p>Пример — последние 20 строк логов пода <code>auth-service</code>:</p>
+<pre><code>kubectl logs auth-service-5f8d9c7b4d-x7k2m -n development --tail=20</code></pre>
+<p>Фрагмент вывода:</p>
+<pre><code>2024-01-15 10:23:45 INFO  [main] Starting AuthService application
+2024-01-15 10:23:46 INFO  [main] Loading configuration from environment
+2024-01-15 10:23:47 INFO  [main] Connecting to database at postgres://db:5432/auth
+2024-01-15 10:23:48 INFO  [main] Database connection established
+2024-01-15 10:23:49 INFO  [main] Starting HTTP server on port 8080
+2024-01-15 10:23:50 INFO  [main] AuthService started successfully
+2024-01-15 10:25:12 INFO  [http-handler] POST /api/v1/login - 200 OK - 45ms
+2024-01-15 10:26:33 INFO  [http-handler] POST /api/v1/login - 401 Unauthorized - 5ms
+2024-01-15 10:28:00 INFO  [http-handler] POST /api/v1/logout - 200 OK - 3ms</code></pre>
+
+<h3>5.2. Как читать строку лога</h3>
+<p><code>2024-01-15 10:23:45 INFO [main] Starting AuthService application</code></p>
+<div class="tablewrap"><table>
+  <thead><tr><th>Часть</th><th>Значение</th></tr></thead>
+  <tbody>
+    <tr><td><code>2024-01-15 10:23:45</code></td><td>Время события</td></tr>
+    <tr><td><code>INFO</code></td><td>Уровень: <code>INFO</code> — обычное событие, <code>WARN</code> — предупреждение, <code>ERROR</code> — ошибка</td></tr>
+    <tr><td><code>[main]</code></td><td>Источник записи. <code>[main]</code> — процесс запуска приложения, <code>[http-handler]</code> — обработка входящего запроса</td></tr>
+    <tr><td>дальше</td><td>Текст сообщения. Для запросов — метод, путь, код ответа и время обработки</td></tr>
+  </tbody>
+</table></div>
+<p><strong>Что видно в примере:</strong></p>
+<ul class="body">
+  <li><strong>Запуск прошёл штатно.</strong> Приложение прочитало конфигурацию, подключилось к базе, поднялось на порту 8080 — всё за пять секунд.</li>
+  <li><strong>Дальше идёт обычная работа:</strong> запросы <code>POST /api/v1/login</code>, <code>/api/v1/refresh</code> и <code>/api/v1/logout</code> с кодом 200 и временем ответа 2–51 мс.</li>
+  <li><strong>Есть две записи с кодом 401 Unauthorized.</strong> Это не сбой приложения: 401 означает, что пользователь ввёл неверные данные для входа. Отдельные 401 в логах сервиса аутентификации — норма. Тревожный признак — их резкий рост: это может говорить об ошибке в клиенте или о попытках подбора пароля.</li>
+</ul>
+
+<h3>5.3. Полезные варианты команды</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th>Задача</th><th>Команда</th></tr></thead>
+  <tbody>
+    <tr><td>Последние N строк</td><td><code>kubectl logs &lt;под&gt; -n development --tail=50</code></td></tr>
+    <tr><td>Следить за логами в реальном времени</td><td><code>kubectl logs &lt;под&gt; -n development -f</code></td></tr>
+    <tr><td>Логи за последний час</td><td><code>kubectl logs &lt;под&gt; -n development --since=1h</code></td></tr>
+    <tr><td>Логи <strong>предыдущего</strong> запуска (после падения контейнера)</td><td><code>kubectl logs &lt;под&gt; -n development --previous</code></td></tr>
+    <tr><td>Логи со всех подов приложения сразу</td><td><code>kubectl logs -n development -l app=auth-service --tail=100</code></td></tr>
+    <tr><td>Логи через деплоймент, без выяснения имени пода</td><td><code>kubectl logs deployment/auth-service -n development</code></td></tr>
+    <tr><td>Конкретный контейнер, если их в поде несколько</td><td><code>kubectl logs &lt;под&gt; -n development -c &lt;контейнер&gt;</code></td></tr>
+    <tr><td>Показывать имя пода перед каждой строкой</td><td><code>kubectl logs -n development -l app=auth-service --prefix</code></td></tr>
+  </tbody>
+</table></div>
+<p><strong>Поиск по логам.</strong> <code>kubectl</code> не умеет фильтровать вывод сам, используйте средства оболочки:</p>
+<pre><code>kubectl logs deployment/auth-service -n development --tail=500 | grep ERROR</code></pre>
+<div class="warn"><strong>Важно.</strong> <code>kubectl logs</code> показывает логи только живого пода. Если под удалён и пересоздан, его прежние логи через <code>kubectl</code> уже недоступны — флаг <code>--previous</code> работает только для перезапуска контейнера в том же поде. Для истории пользуйтесь системой сбора логов платформы.</div>
+
+<h2 id="problems">Частые проблемы и их решения</h2>
+
+<h3>Проблема 1. Команда отвечает «No resources found», хотя приложение работает</h3>
+<p><strong>Симптом:</strong></p>
+<pre><code>$ kubectl get pods
+No resources found in default namespace.</code></pre>
+<p><strong>Причина.</strong> Команда выполнена не в том namespace. Без флага <code>-n</code> используется namespace по умолчанию — чаще всего <code>default</code>, где приложений платформы нет.</p>
+<p><strong>Решение.</strong></p>
+<ol class="body">
+  <li>Проверьте текущий namespace:
+    <pre><code>kubectl config view --minify --output 'jsonpath={..namespace}'</code></pre>
+  </li>
+  <li>Укажите нужный namespace явно:
+    <pre><code>kubectl get pods -n development</code></pre>
+  </li>
+  <li>Чтобы не повторялось, задайте namespace по умолчанию:
+    <pre><code>kubectl config set-context --current --namespace=development</code></pre>
+  </li>
+</ol>
+<p><strong>Профилактика.</strong> Проверяйте namespace перед командами, изменяющими состояние кластера. Не найти ресурс неприятно, но безопасно; удалить его не в том окружении — гораздо хуже.</p>
+
+<h3>Проблема 2. Под в состоянии CrashLoopBackOff</h3>
+<p><strong>Симптом:</strong></p>
+<pre><code>NAME                            READY   STATUS             RESTARTS   AGE
+payment-service-8e9f0a1b7e-o2p4q  0/1   CrashLoopBackOff   5          4m</code></pre>
+<p><strong>Причина.</strong> Контейнер запускается, приложение падает, Kubernetes перезапускает его — и так по кругу, с увеличивающейся паузой между попытками. Типичные причины: ошибка в конфигурации или переменных окружения, недоступная база данных, занятый порт, отсутствующий обязательный параметр.</p>
+<p><strong>Решение.</strong></p>
+<ol class="body">
+  <li>Посмотрите логи предыдущего запуска — текущий контейнер, скорее всего, ещё не успел ничего записать:
+    <pre><code>kubectl logs payment-service-8e9f0a1b7e-o2p4q -n development --previous</code></pre>
+    Ищите последние строки перед падением: обычно там прямо написана причина — например, <code>Connection refused</code> при подключении к базе.
+  </li>
+  <li>Если в логах ничего нет, посмотрите события пода:
+    <pre><code>kubectl describe pod payment-service-8e9f0a1b7e-o2p4q -n development</code></pre>
+    Обратите внимание на раздел <strong>Events</strong> и на поле <strong>Last State</strong> с кодом завершения. Код <code>137</code> означает, что контейнер был остановлен из-за нехватки памяти (OOMKilled) — нужно увеличить лимит.
+  </li>
+  <li>Проверьте, что все нужные ConfigMap и Secret существуют и содержат ожидаемые ключи:
+    <pre><code>kubectl get configmap,secret -n development</code></pre>
+  </li>
+  <li>Устраните причину и примените исправленный манифест. Отдельно перезапускать под не требуется — Deployment создаст новый.</li>
+</ol>
+<p><strong>Как срочно вернуться к рабочей версии,</strong> если поломало обновление:</p>
+<pre><code>kubectl rollout undo deployment/payment-service -n development</code></pre>
+
+<h3>Проблема 3. Деплоймент показывает не все готовые копии</h3>
+<p><strong>Симптом:</strong></p>
+<pre><code>NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+auth-service   1/2     2            1           45d</code></pre>
+<p>Одна копия из двух не готова. Приложение работает, но без запаса: падение второго пода оставит сервис без обслуживания.</p>
+<p><strong>Причина.</strong> Варианты:</p>
+<ul class="body">
+  <li>поду не хватает ресурсов и он висит в <code>Pending</code>;</li>
+  <li>приложение запустилось, но не проходит проверку готовности (readiness probe);</li>
+  <li>образ новой версии не скачивается.</li>
+</ul>
+<p><strong>Решение.</strong></p>
+<ol class="body">
+  <li>Найдите проблемный под — он будет со статусом, отличным от <code>Running</code>, или с <code>READY 0/1</code>:
+    <pre><code>kubectl get pods -n development -l app=auth-service</code></pre>
+  </li>
+  <li>Посмотрите его события:
+    <pre><code>kubectl describe pod &lt;имя-пода&gt; -n development</code></pre>
+    Что можно увидеть в <strong>Events</strong>:
+    <ul class="body">
+      <li><code>Insufficient cpu</code> или <code>Insufficient memory</code> — на узлах нет свободных ресурсов под запрошенные лимиты. Уменьшите запросы (<code>requests</code>) в манифесте или обратитесь в команду эксплуатации;</li>
+      <li><code>Readiness probe failed</code> — приложение запущено, но не отвечает на проверку. Проверьте в манифесте путь и порт проверки; частая ошибка — проверка настроена на порт, отличный от того, который слушает приложение (у наших сервисов это 8080). Если приложение долго стартует, увеличьте <code>initialDelaySeconds</code>;</li>
+      <li><code>Failed to pull image</code> — недоступен образ. Проверьте имя и тег.</li>
+    </ul>
+  </li>
+  <li>Проверьте состояние развёртывания:
+    <pre><code>kubectl rollout status deployment/auth-service -n development</code></pre>
+    Если развёртывание зависло, команда об этом сообщит.
+  </li>
+</ol>
+<p><strong>Профилактика.</strong> Держите не менее двух копий для сервисов, которые обслуживают запросы, и указывайте <code>requests</code> близко к реальному потреблению — так планировщику проще найти узел.</p>
+
+</main>
+</div>
+
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav a[href^="#"]'));
+  var map = {}, targets = [];
+  links.forEach(function (a) {
+    var el = document.getElementById(a.getAttribute('href').slice(1));
+    if (el) { map[el.id] = a; targets.push(el); }
+  });
+  if (!('IntersectionObserver' in window) || !targets.length) return;
+  var visible = {};
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { visible[e.target.id] = e.isIntersecting; });
+    var current = null;
+    for (var i = 0; i < targets.length; i++) { if (visible[targets[i].id]) { current = targets[i].id; break; } }
+    if (!current) return;
+    links.forEach(function (a) { a.classList.remove('active'); });
+    map[current].classList.add('active');
+  }, { rootMargin: '-10% 0px -70% 0px', threshold: 0 });
+  targets.forEach(function (el) { observer.observe(el); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дарья Кирова · технический писатель · Примеры документации</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1f2328; --muted: #616a75; --border: #d8dee4;
+    --accent: #0a6ebd; --card: #fafbfc; --tag: #f0f3f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171a; --fg: #e4e6e8; --muted: #9aa4ae; --border: #2c3238;
+      --accent: #58a6e8; --card: #171b1f; --tag: #1e2328;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 24px 80px; counter-reset: card; }
+  h1 { font-size: 28px; margin: 0 0 4px; font-weight: 600; letter-spacing: -.01em; }
+  .role { color: var(--muted); font-size: 16px; margin: 0 0 10px; }
+  .contact { color: var(--muted); font-size: 14px; margin: 0 0 22px; }
+  .contact a { color: var(--accent); text-decoration: none; }
+  .contact a:hover { text-decoration: underline; }
+  .intro { font-size: 15.5px; margin: 0 0 12px; }
+  .stack { color: var(--muted); font-size: 13.5px; margin: 16px 0 34px; }
+  h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+    margin: 0 0 14px; font-weight: 600;
+  }
+  a.card {
+    display: block; text-decoration: none; color: inherit;
+    border: 1px solid var(--border); border-radius: 7px; background: var(--card);
+    padding: 18px 20px; margin-bottom: 14px; transition: border-color .13s, transform .13s;
+  }
+  a.card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  a.card:hover .title { color: var(--accent); }
+  a.card { counter-increment: card; }
+  .title { font-size: 17px; font-weight: 600; margin: 0 0 7px; }
+  .title::before { content: counter(card) ". "; color: var(--accent); font-weight: 700; }
+  .meta { margin: 0 0 9px; }
+  .tag {
+    display: inline-block; font-size: 12px; color: var(--muted); background: var(--tag);
+    border: 1px solid var(--border); border-radius: 11px; padding: 1px 9px; margin: 0 5px 4px 0;
+  }
+  .desc { color: var(--muted); font-size: 14.5px; margin: 0; }
+  .desc code { font-family: "SF Mono", Consolas, monospace; font-size: 12.5px; background: var(--tag); padding: 1px 4px; border-radius: 3px; }
+  .disclaimer {
+    border: 1px solid var(--warn-border); background: var(--warn-bg);
+    border-radius: 7px; padding: 13px 16px; margin: 0 0 40px; font-size: 14px;
+  }
+  :root { --warn-bg: #fdf4e7; --warn-border: #e8c48a; }
+  @media (prefers-color-scheme: dark) { :root { --warn-bg: #2a2318; --warn-border: #5c4a2a; } }
+  footer {
+    margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 13.5px;
+  }
+  footer p { margin: 6px 0; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Дарья Кирова</h1>
+  <p class="role">Технический писатель</p>
+  <p class="contact">
+    почта: <a href="mailto:kirovadasha@yandex.ru">kirovadasha@yandex.ru</a>
+    &nbsp;·&nbsp; tg: <a href="https://t.me/daria_hi">@daria_hi</a>
+  </p>
+
+  <p class="intro">
+    Пишу руководства пользователя и администратора, базы знаний, API-документацию, документацию для
+    разработчиков, описания функциональности и тексты интерфейса. Работаю с документацией разного
+    уровня сложности: от пользовательских сценариев до технических материалов по API, интеграциям
+    и инфраструктуре.
+  </p>
+  <p class="intro">
+    Разбираюсь в продукте самостоятельно: изучаю спецификации и техническую документацию, работаю
+    с тестовыми стендами, проверяю описанные сценарии и превращаю сложные технические темы (API,
+    WebSocket, Kubernetes, управление доступом) в понятные материалы для разных аудиторий.
+  </p>
+
+  <p class="stack"><strong>Стек:</strong> Markdown · AsciiDoc · LaTeX · Git · OpenAPI · REST API · WebSocket · Postman · Kubernetes</p>
+
+  <div class="disclaimer">
+    Документация, которую я составляла на работе, закрыта NDA. Поэтому в портфолио представлены
+    демонстрационные примеры, созданные для показа моего подхода к структуре и оформлению технических
+    материалов. Часть примеров основана на существующих сторонних продуктах, но не является их
+    официальной документацией. Я не связана с компаниями, чьи продукты описаны.
+  </div>
+
+  <h2>Примеры работ</h2>
+
+  <a class="card" href="api-reference/">
+    <p class="title">Справка по API GroundLink</p>
+    <p class="meta">
+      <span class="tag">Справка по API</span><span class="tag">REST + WebSocket</span><span class="tag">Русский</span><span class="tag">Markdown → HTML</span>
+    </p>
+    <p class="desc">
+      Справочная документация для вымышленного API сервиса наземных станций. Описывает REST-эндпоинты
+      для бронирования сеансов связи и WebSocket-поток телеметрии. Включает аутентификацию, параметры
+      запросов и ответов, примеры cURL, описание переподключения, коды ошибок и глоссарий.
+    </p>
+  </a>
+
+  <a class="card" href="kubernetes/">
+    <p class="title">Kubernetes: руководство по работе с приложениями</p>
+    <p class="meta">
+      <span class="tag">Руководство для разработчиков</span><span class="tag">Русский</span><span class="tag">Markdown → HTML</span>
+    </p>
+    <p class="desc">
+      Практическое руководство для разработчиков, которые разворачивают и сопровождают приложения в
+      Kubernetes. Показывает, как работать с <code>kubectl</code>, анализировать состояние ресурсов и
+      диагностировать типовые сбои (<code>CrashLoopBackOff</code>, <code>ImagePullBackOff</code> и
+      другие) по схеме «симптом → причина → решение». Разработано как практическое задание по
+      техническому документированию на основе официальной документации Kubernetes.
+    </p>
+  </a>
+
+  <a class="card" href="samples/whatsapp-ttl-validity-period.pdf">
+    <p class="title">Поле TTL (Validity Period) в шаблонах WhatsApp Business</p>
+    <p class="meta">
+      <span class="tag">Статья базы знаний</span><span class="tag">Английский</span><span class="tag">PDF</span>
+    </p>
+    <p class="desc">
+      Статья базы знаний для техподдержки и отдела продаж о параметре TTL (Validity Period) в шаблонах
+      WhatsApp Business. Объясняет назначение настройки, ограничения, сценарии использования, настройку
+      в интерфейсе, типовые проблемы и содержит FAQ с user flow.
+    </p>
+  </a>
+
+  <a class="card" href="samples/workspace-admin-guide.pdf">
+    <p class="title">Управление доступом и структурой организации: руководство администратора</p>
+    <p class="meta">
+      <span class="tag">Руководство администратора</span><span class="tag">Русский</span><span class="tag">LaTeX → PDF</span>
+    </p>
+    <p class="desc">
+      Раздел пользовательской документации (руководства администратора) по управлению пользователями
+      и доступом. Описывает управление административными правами, сотрудниками, SSO, поиск профилей,
+      блокировку и удаление аккаунтов. Документ оформлен с кликабельной навигацией и предупреждениями
+      о необратимых действиях.
+    </p>
+  </a>
+
+</div>
+</body>
+</html>
